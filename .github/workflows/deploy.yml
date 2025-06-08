@@ -33,15 +33,3 @@ jobs:
         with:
           branch: gh-pages
           folder: browser/dist
-
-  deploy-fly:
-    
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    env:
-      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-    steps:
-      - uses: actions/checkout@v4.1.7
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
