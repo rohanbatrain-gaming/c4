@@ -1,35 +1,41 @@
-name: Deploy
+name: Deploy to GitHub Pages
 
 on:
   workflow_run:
-    branches: [master]
-    workflows: [Test]
-    types:
-      - completed
+    workflows: [Test]         # Trigger only after 'Test' workflow
+    branches: [master]        # On 'master' branch
+    types: 
+      - completed             # When the workflow completes
 
 jobs:
-  deploy-gh-pages:
-
+  deploy:
+    name: Deploy to gh-pages
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # Run only if previous workflow succeeded
 
     strategy:
       matrix:
         node-version: [22]
-  
+
     steps:
-      - uses: actions/checkout@v4.1.7
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4.0.2
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-      - name: Build
+
+      - name: Build project
         run: yarn workspace @kenrick95/c4-browser run build-gh-pages
-      - name: Deploy
+
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.6.1
         with:
-          branch: gh-pages
-          folder: browser/dist
+          branch: gh-pages       # Target branch
+          folder: browser/dist   # Folder to deploy
